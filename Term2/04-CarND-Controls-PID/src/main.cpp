@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     steer_pid.Init(0, 0, 0, true);
     speed_pid.Init(1, 0.0001, 0.2, false);
   } else {
-    steer_pid.Init(0.114493,0,0.48717, false);
+    steer_pid.Init(0.18209,0.0004,0.81051, false);
     speed_pid.Init(1, 0.0001, 0.2, false);
   }
 

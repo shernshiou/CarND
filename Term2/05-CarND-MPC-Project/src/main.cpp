@@ -101,6 +101,8 @@ int main() {
           */
           Eigen::VectorXd xvals(N);
           Eigen::VectorXd yvals(N);
+
+          // Converts to vehicle coordinate
           for(int i = 0; i < N; i++) {
             double dx = ptsx[i] - px;
             double dy = ptsy[i] - py;
@@ -138,6 +140,10 @@ int main() {
           //Display the waypoints/reference line
           vector<double> next_x_vals;
           vector<double> next_y_vals;
+          for(int i = 0; i < N; i++){
+            next_x_vals.push_back(xvals[i]);
+            next_y_vals.push_back(yvals[i]);
+          }
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line

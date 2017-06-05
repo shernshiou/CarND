@@ -65,7 +65,7 @@ class FG_eval {
 
     // Minimize the value gap between sequential actuations.
     for (int i = 0; i < N - 2; i++) {
-      fg[0] += CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
+      fg[0] += 10000 * CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
       fg[0] += CppAD::pow(vars[a_start + i + 1] - vars[a_start + i], 2);
     }
 
@@ -179,8 +179,8 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
 
   // Acceleration/decceleration upper and lower limits.
   for (int i = a_start; i < n_vars; i++) {
-    vars_lowerbound[i] = -1.0;
-    vars_upperbound[i] = 1.0;
+    vars_lowerbound[i] = -0.5;
+    vars_upperbound[i] = 0.5;
   }
 
   // Lower and upper limits for the constraints
@@ -247,13 +247,14 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // {...} is shorthand for creating a vector, so auto x1 = {1.0,2.0}
   // creates a 2 element double vector.
   vector<double> result;
+  vector<double> p_x;
+  vector<double> p_y;
+  for (int i = 0; i < N; i++) {
+    p_x.push_back(solution.x[x_start + i]);
+    p_y.push_back(solution.x[y_start + i]);
+  }
+  prediction = std::make_tuple(p_x, p_y);
   result.push_back(solution.x[delta_start]);
   result.push_back(solution.x[a_start]);
-  for(int i=x_start;i<y_start;i++){
-  	result.push_back(solution.x[i]);
-  }
-  for(int i=y_start;i<psi_start;i++){
-  	result.push_back(solution.x[i]);
-  }
   return result;
 }

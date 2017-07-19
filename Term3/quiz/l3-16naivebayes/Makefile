@@ -6,10 +6,12 @@ EXECUTABLE = naivebayes
 
 all: $(EXECUTABLE)
 
+rebuild: clean $(EXECUTABLE)
+
 clean:
-	rm $(EXECUTABLE)
+	rm -rf $(EXECUTABLE)
 
 $(EXECUTABLE):
 	$(CC) $(CFLAGS) $(SOURCES) -o $(EXECUTABLE)
 
-.PHONY: all clean
+.PHONY: all clean rebuild

@@ -7,8 +7,10 @@ add_definitions(-std=c++11)
 set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
 
-set(sources src/main.cpp)
-
+set(SOURCE
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/map.cpp
+)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
@@ -21,6 +23,6 @@ link_directories(/usr/local/Cellar/libuv/1.11.0/lib)
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 
-add_executable(path_planning ${sources})
+add_executable(path_planning ${SOURCE})
 
 target_link_libraries(path_planning z ssl uv uWS)

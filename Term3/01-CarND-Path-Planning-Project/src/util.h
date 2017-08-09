@@ -22,7 +22,7 @@ class Util {
   }
 
   static int ClosestWaypoint(double x, double y, vector<double> maps_x, vector<double> maps_y) {
-  	double closestLen = 100000; //large number
+  	double closestLen = 100000; // large number
   	int closestWaypoint = 0;
 
   	for(int i = 0; i < maps_x.size(); i++) {
@@ -56,18 +56,20 @@ class Util {
   }
 
   static double LaneToD(int lane) {
-      double d = (double)(((lane - 1) * LANE_WIDTH)+(LANE_WIDTH/2));
-	  if (lane == 1) { d += 0.1; }
-	  if (lane == 3) { d -= 0.1; }
-
-      return d;
+    //   double d = (double)(((lane - 1) * LANE_WIDTH)+(LANE_WIDTH/2));
+	//   if (lane == 1) { d += 0.1; }
+	//   if (lane == 3) { d -= 0.1; }
+      //
+    //   return d;
+    return 2 + 4*lane;
   }
 
   static int DToLane(double d) {
-      int lane = ceil(d/LANE_WIDTH);
-      if(lane > 0 & lane < 4) { return lane; }
-
-      return 0;
+    //   int lane = ceil(d/LANE_WIDTH);
+    //   if(lane > 0 & lane < 4) { return lane; }
+      //
+    //   return 0;
+    return (d-2) / 4;
   }
 
   // Transform from Cartesian x,y coordinates to Frenet s,d coordinates
@@ -115,7 +117,7 @@ class Util {
   }
 
   // Transform from Frenet s,d coordinates to Cartesian x,y
-  vector<double> getXY(double s, double d, vector<double> maps_s, vector<double> maps_x, vector<double> maps_y) {
+  static vector<double> getXY(double s, double d, vector<double> maps_s, vector<double> maps_x, vector<double> maps_y) {
   	int prev_wp = -1;
 
   	while(s > maps_s[prev_wp+1] && (prev_wp < (int)(maps_s.size()-1))) {
@@ -162,7 +164,7 @@ class Util {
   > JMT( [0, 10, 0], [10, 10, 0], 1)
   [0.0, 10.0, 0.0, 0.0, 0.0, 0.0]
   */
-  vector<double> JMT(vector< double> start, vector <double> end, double T) {
+  static vector<double> JMT(vector< double> start, vector <double> end, double T) {
     MatrixXd A = MatrixXd(3, 3);
     MatrixXd B = MatrixXd(3,1);
 

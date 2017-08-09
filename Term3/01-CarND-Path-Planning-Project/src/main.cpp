@@ -10,6 +10,7 @@
 #include "json.hpp"
 #include "pathway.h"
 #include "plan.h"
+#include "util.h"
 
 using namespace std;
 
@@ -116,20 +117,6 @@ int main() {
           	vector<double> next_y_vals;
 
             planner.NextTrajectory(j, next_x_vals, next_y_vals);
-            // planner.Follow(car_s, next_x_vals, next_y_vals);
-            /***************************
-    				* First movement verification. The car follow a lane
-    				***************************/
-    				// double car_last_s = car_s;
-    				// //if(previous_path_x[previous_path_x.size()] != 0)
-    				// //	car_last_s = (double)previous_path_x[previous_path_x.size()];
-    				// double dist_inc = 0.5;
-    				// for(int i = 0; i < 50; i++)
-    				// {
-    				// 	next_x_vals.push_back(road_map.spline_x(car_last_s+(dist_inc*i)));
-    				// 	next_y_vals.push_back(road_map.spline_y(car_last_s+(dist_inc*i))-6);
-    				// }
-
           	// TODO: define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
           	msgJson["next_x"] = next_x_vals;
           	msgJson["next_y"] = next_y_vals;

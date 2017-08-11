@@ -15,7 +15,8 @@ When moving, the model receives its sensor fusion data on the surrounding cars p
 Although the car model satisfy the minimum requirements of the project, there are a few improvements can be made.
 
 1. Speed, We can use a better control either with MPC or JMT better facilitate the speed curve rather than the linear curve here.
-2. Speed of the other car, The speed of the other car can be calculated and used to guide the main car like follow the speed of the car in front or prohibit it to change lane if the rear car (of the intended lane) is dangerously fast. 
+2. Speed of the other car, The speed of the other car can be calculated and used to guide the main car like follow the speed of the car in front or prohibit it to change lane if the rear car (of the intended lane) is dangerously fast.
+3. We can set the behaviour of the car to always stay at the left most lane in case the car need to overtake. 
 
 ### Simulator.
 You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases).

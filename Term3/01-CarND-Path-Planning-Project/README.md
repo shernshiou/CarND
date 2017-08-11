@@ -1,6 +1,22 @@
 # CarND-Path-Planning-Project
 Self-Driving Car Engineer Nanodegree Program
-   
+
+### Model Documentation
+The car driving model following the waypoints from the simulator. The lanes are defined as follows (using Frenet D values):-
+Lane 1: 0 <= d < 4
+Lane 2: 4 <= d < 6
+Lane 3: 6 <= d < 8
+
+There are 3 states (Ready, Keep Lane, and Prepare Change) used in this simple car model. Upon startup, the car is at a Ready state. After setting the initial configuration (e.g. lane, car speed), the state of the car will switch to Keep Lane where it will follow the waypoints from the simulator at the initial lane (Lane 2). The speed of its velocity will increase until it reaches the maximum 49.5mph (below the speed limit of 50mph). To guide the trajectory of the car, spline library is used to smoothen the waypoints.
+
+When moving, the model receives its sensor fusion data on the surrounding cars passed from the simulator. The data are parsed and translate to understand its space. In main-vehicle.cpp, we introduced the array of gap_font and gap_rear. Using the arrays, we record the gap for each lane at front and the back. If the front gap of the car is lower than 40, the car will slow down and enter Prepare Change state looking for opportunity to change either left or right. A cost is calculated based on the combination of front gap and rear gap. If it encounters a lane with 30 front gap and 10 rear gap, the car will be ready for lane change. Once the velocity of the car hit below 32mph, it will proceed to execute lane change. After lane change complete, the car will switch to Keep Lane state and proceed to increase its speed until it hit 49.5mph again.
+
+#### Improvements
+Although the car model satisfy the minimum requirements of the project, there are a few improvements can be made.
+
+1. Speed, We can use a better control either with MPC or JMT better facilitate the speed curve rather than the linear curve here.
+2. Speed of the other car, The speed of the other car can be calculated and used to guide the main car like follow the speed of the car in front or prohibit it to change lane if the rear car (of the intended lane) is dangerously fast. 
+
 ### Simulator.
 You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases).
 
@@ -38,13 +54,13 @@ Here is the data provided from the Simulator to the C++ Program
 #### Previous path data given to the Planner
 
 //Note: Return the previous list but with processed points removed, can be a nice tool to show how far along
-the path has processed since last time. 
+the path has processed since last time.
 
 ["previous_path_x"] The previous list of x points previously given to the simulator
 
 ["previous_path_y"] The previous list of y points previously given to the simulator
 
-#### Previous path's end s and d values 
+#### Previous path's end s and d values
 
 ["end_path_s"] The previous list's last point's frenet s value
 
@@ -52,7 +68,7 @@ the path has processed since last time.
 
 #### Sensor Fusion Data, a list of all other car's attributes on the same side of the road. (No Noise)
 
-["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates. 
+["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates.
 
 ## Details
 
@@ -82,7 +98,7 @@ A really helpful resource for doing this project and creating smooth trajectorie
   * Run either `install-mac.sh` or `install-ubuntu.sh`.
   * If you install from source, checkout to commit `e94b6e1`, i.e.
     ```
-    git clone https://github.com/uWebSockets/uWebSockets 
+    git clone https://github.com/uWebSockets/uWebSockets
     cd uWebSockets
     git checkout e94b6e1
     ```

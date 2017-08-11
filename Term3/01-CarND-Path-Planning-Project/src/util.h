@@ -65,11 +65,11 @@ class Util {
   }
 
   static int DToLane(double d) {
-    //   int lane = ceil(d/LANE_WIDTH);
-    //   if(lane > 0 & lane < 4) { return lane; }
-      //
-    //   return 0;
-    return (d-2) / 4;
+      int lane = ceil(d/LANE_WIDTH);
+      if(lane > 0 & lane < 4) { return lane; }
+
+      return 0;
+    //return (int)floor((d-2) / 4);
   }
 
   // Transform from Cartesian x,y coordinates to Frenet s,d coordinates

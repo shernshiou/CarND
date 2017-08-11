@@ -1,7 +1,7 @@
 #include "plan.h"
 
 Plan::Plan(Pathway road_map) {
-  ref_velocity_ = 49.5;
+  ref_velocity_ = 0.0;
   road_map_ = road_map;
   road_map_.InitSpline();
   road_map_.RefineSpline();
@@ -14,42 +14,26 @@ void Plan::NextTrajectory(json j, vector<double> &next_x_vals, vector<double> &n
     vector<double> previous_path_y = j[1]["previous_path_y"];
     auto sensor_fusion = j[1]["sensor_fusion"];
 
-    // Trajectory traject = KeepLane(previous_path_x, previous_path_y);
-    car_ = MainVehicle(j[1]["x"], j[1]["y"], j[1]["s"], j[1]["d"], j[1]["yaw"], j[1]["speed"]);
-    Trajectory traject = KeepLane(previous_path_x, previous_path_y);
+    Trajectory traject;
+    if (previous_path_x.size() == 0 && current_state_ == State::READY) {
+        car_ = MainVehicle(j[1]["x"], j[1]["y"], j[1]["s"], j[1]["d"], j[1]["yaw"], j[1]["speed"]);
+        car_.Update(1);
+        car_.ComputeGap(sensor_fusion, road_map_, previous_path_x.size());
+        // car_.PrintGap();
+        traject = GenTrajectory(previous_path_x, previous_path_y);
+        current_state_ = State::KEEP_LANE;
+    } else {
+        car_.Update(j[1]["x"], j[1]["y"], j[1]["s"], j[1]["d"], j[1]["yaw"], j[1]["speed"]);
+        car_.ComputeGap(sensor_fusion, road_map_, previous_path_x.size());
+        car_.PrintGap();
+        traject = GenTrajectory(previous_path_x, previous_path_y);
+    }
+
     next_x_vals = traject.x_vals;
     next_y_vals = traject.y_vals;
-    // cout << previous_path_x.size() << endl;
-    // if (previous_path_x.size() == 0 && current_state_ == State::READY) {
-    //     car_ = MainVehicle(j[1]["x"], j[1]["y"], j[1]["s"], j[1]["d"], j[1]["yaw"], j[1]["speed"]);
-    //     car_.ComputeGap(sensor_fusion, road_map_);
-    //     car_.PrintGap();
-    //     car_.Update(2); // Start at middle lane
-    //     cout << car_.ComputeOptimumSpeed() << endl;
-    //     Trajectory traject = KeepLane();
-    //     next_x_vals = traject.x_vals;
-    //     next_y_vals = traject.y_vals;
-    //     current_state_ = State::KEEP_LANE;
-    // } else if (previous_path_x.size() > 30) {
-    //     car_.Update(j[1]["x"], j[1]["y"], j[1]["s"], j[1]["d"], j[1]["yaw"], j[1]["speed"]);
-    //     car_.ComputeGap(sensor_fusion, road_map_);
-    //     car_.PrintGap();
-    //     cout << car_.ComputeOptimumSpeed() << endl;
-    //     next_x_vals = previous_path_x;
-    //     next_y_vals = previous_path_y;
-    // } else {
-    //     car_.Update(j[1]["x"], j[1]["y"], j[1]["s"], j[1]["d"], j[1]["yaw"], j[1]["speed"]);
-    //     car_.ComputeGap(sensor_fusion, road_map_);
-    //     car_.PrintGap();
-    //     cout << car_.ComputeOptimumSpeed() << endl;
-    //     Trajectory traject = KeepLane();
-    //     next_x_vals = traject.x_vals;
-    //     next_y_vals = traject.y_vals;
-    //     current_state_ = State::KEEP_LANE;
-    // }
 }
 
-Trajectory Plan::KeepLane(vector<double> previous_path_x, vector<double> previous_path_y) {
+Trajectory Plan::GenTrajectory(vector<double> previous_path_x, vector<double> previous_path_y) {
     Trajectory traject;
     vector<double> ptsx, ptsy;
     int prev_size = previous_path_x.size();
@@ -78,9 +62,50 @@ Trajectory Plan::KeepLane(vector<double> previous_path_x, vector<double> previou
         ptsy.push_back(ref_y);
     }
 
-    vector<double> next_wp0 = Util::getXY(car_.s_+30, Util::LaneToD(1), road_map_.coarse_s_, road_map_.coarse_x_, road_map_.coarse_y_);
-    vector<double> next_wp1 = Util::getXY(car_.s_+60, Util::LaneToD(1), road_map_.coarse_s_, road_map_.coarse_x_, road_map_.coarse_y_);
-    vector<double> next_wp2 = Util::getXY(car_.s_+90, Util::LaneToD(1), road_map_.coarse_s_, road_map_.coarse_x_, road_map_.coarse_y_);
+    if (ref_velocity_ > 1 && car_.gap_front_[car_.lane_] < 40) {
+        if (ref_velocity_ > 20)
+            ref_velocity_ -= .324;
+        cout << "Prepare to change" << ":" << ref_velocity_ << endl;
+        current_state_ = State::PREPARE_CHANGE;
+
+        if (ref_velocity_ < 32 && current_state_ == State::PREPARE_CHANGE) {
+            int left_lane = car_.lane_ -1;
+            int right_lane = car_.lane_ +1;
+
+            double cost_left = 0;
+            double cost_right = 0;
+
+            // Cost of Left
+            if (left_lane >= 0 && car_.gap_front_[left_lane] > 30 && car_.gap_rear_[left_lane] > 10) {
+                cost_left += (int)car_.gap_front_[left_lane];
+                cost_left += (int)car_.gap_rear_[left_lane];
+            }
+
+            // Cost of Right
+            if (right_lane <=2 && car_.gap_front_[right_lane] > 30 && car_.gap_rear_[right_lane] > 10) {
+                cost_right += (int)car_.gap_front_[right_lane];
+                cost_right += (int)car_.gap_rear_[right_lane];
+            }
+
+            cost_left -= 0.002; // Always prefer left if similar
+
+            if (cost_left > 0 && cost_left > cost_right) {
+                car_.lane_ = left_lane;
+                current_state_ = State::KEEP_LANE;
+            } else if (cost_right > 0 && cost_right > cost_left) {
+                car_.lane_ = right_lane;
+                current_state_ = State::KEEP_LANE;
+            }
+        }
+    } else if (ref_velocity_ < 49.5){
+        ref_velocity_ += .224;
+        cout << "Keep Lane" << endl;
+        current_state_ = State::KEEP_LANE;
+    }
+
+    vector<double> next_wp0 = Util::getXY(car_.s_+30, Util::LaneToD(car_.lane_), road_map_.coarse_s_, road_map_.coarse_x_, road_map_.coarse_y_);
+    vector<double> next_wp1 = Util::getXY(car_.s_+60, Util::LaneToD(car_.lane_), road_map_.coarse_s_, road_map_.coarse_x_, road_map_.coarse_y_);
+    vector<double> next_wp2 = Util::getXY(car_.s_+90, Util::LaneToD(car_.lane_), road_map_.coarse_s_, road_map_.coarse_x_, road_map_.coarse_y_);
 
     ptsx.push_back(next_wp0[0]);
     ptsx.push_back(next_wp1[0]);

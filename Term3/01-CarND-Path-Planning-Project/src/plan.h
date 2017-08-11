@@ -23,7 +23,6 @@ using json = nlohmann::json;
 struct Path {
     std::vector<double> s_start;
     std::vector<double> s_end;
-
     std::vector<double> d_start;
     std::vector<double> d_end;
 };
@@ -38,8 +37,7 @@ struct Trajectory {
 enum State {
   READY,
   KEEP_LANE,
-  CHANGE_RIGHT,
-  CHANGE_LEFT
+  PREPARE_CHANGE
 };
 
 class Plan {
@@ -48,6 +46,7 @@ class Plan {
   MainVehicle car_;
   State current_state_;
   double ref_velocity_;
+  std::array<double, 3> lane_cost_;
 
  public:
   Plan() = default;
@@ -56,9 +55,10 @@ class Plan {
 
   Trajectory Follow();
   Trajectory Follow(double car_s, vector<double> &next_x_vals, vector<double> &next_y_vals);
-  Trajectory KeepLane(vector<double> previous_path_x, vector<double> previous_path_y);
+  Trajectory GenTrajectory(vector<double> previous_path_x, vector<double> previous_path_y);
   Trajectory MinimumJerk(Path proposed_path);
   vector<double> CalcMinimumJerk(vector<double> start, vector<double> end);
+  void CalcCost();
   void NextTrajectory(json j, vector<double> &next_x_vals, vector<double> &next_y_vals);
 
   double ComputeCarVelocity();

@@ -3,16 +3,6 @@
 
 #include "vehicle.h"
 
-#define MAX_SPEED 19
-#define MIN_SPEED 10
-
-#define KL_ACC_COEFF 4.0
-#define FORWARD_COLLISION_BUFFER 20.0
-#define BACKWARD_COLLISION_BUFFER 10.0
-
-#define MIN_SPEED_VAR -4.0
-#define MAX_SPEED_VAR 4.0
-
 class MainVehicle : public Vehicle {
  public:
     MainVehicle()  = default;
@@ -26,9 +16,7 @@ class MainVehicle : public Vehicle {
 
     using Vehicle::Update;
     void Update(double x, double y, double s, double d, double yaw, double speed);
-    void ComputeGap(std::vector<std::vector<double>> sensor_fusion, Pathway road_map);
-    double ComputeOptimumSpeed();
-    double ComputeOptimumSpeed(int lane);
+    void ComputeGap(std::vector<std::vector<double>> sensor_fusion, Pathway road_map, int size);
     void PrintGap();
 };
 

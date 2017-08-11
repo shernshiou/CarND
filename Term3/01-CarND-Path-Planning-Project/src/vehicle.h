@@ -20,7 +20,7 @@ class Vehicle {
     ~Vehicle() = default;
 
     int id_, lane_;
-    double x_, y_, s_, d_, yaw_, speed_;
+    double x_, y_, s_, ss_, d_, yaw_, speed_;
     double vx_, vy_;
     // double speed_;
 

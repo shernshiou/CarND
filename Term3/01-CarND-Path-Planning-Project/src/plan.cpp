@@ -63,8 +63,14 @@ Trajectory Plan::GenTrajectory(vector<double> previous_path_x, vector<double> pr
     }
 
     if (ref_velocity_ > 1 && car_.gap_front_[car_.lane_] < 40) {
-        if (ref_velocity_ > 20)
-            ref_velocity_ -= .324;
+        // double reduction = (-10*car_.gap_front_[car_.lane_]+624)/1000;
+        double reduction = (50 - car_.gap_front_[car_.lane_])/100 + 0.424;
+        // reduction = 0.324;
+        cout << reduction << endl;
+        if (ref_velocity_ > 10) {
+            ref_velocity_ -= reduction;
+        }
+
         cout << "Prepare to change" << ":" << ref_velocity_ << endl;
         current_state_ = State::PREPARE_CHANGE;
 
@@ -76,15 +82,21 @@ Trajectory Plan::GenTrajectory(vector<double> previous_path_x, vector<double> pr
             double cost_right = 0;
 
             // Cost of Left
-            if (left_lane >= 0 && car_.gap_front_[left_lane] > 30 && car_.gap_rear_[left_lane] > 10) {
+            if (left_lane >= 0 && car_.gap_front_[left_lane] > 30 && car_.gap_rear_[left_lane] > 20) {
                 cost_left += (int)car_.gap_front_[left_lane];
                 cost_left += (int)car_.gap_rear_[left_lane];
+                // if (car_.closest_rear_[left_lane].speed_ > 18 && car_.gap_rear_[left_lane] < 100) {
+                //     cost_left = 0;
+                // }
             }
 
             // Cost of Right
-            if (right_lane <=2 && car_.gap_front_[right_lane] > 30 && car_.gap_rear_[right_lane] > 10) {
+            if (right_lane <=2 && car_.gap_front_[right_lane] > 30 && car_.gap_rear_[right_lane] > 20 && car_.closest_rear_[right_lane].speed_ < 18) {
                 cost_right += (int)car_.gap_front_[right_lane];
                 cost_right += (int)car_.gap_rear_[right_lane];
+                // if (car_.closest_rear_[right_lane].speed_ > 18 && car_.gap_rear_[right_lane] < 100) {
+                //     cost_right = 0;
+                // }
             }
 
             cost_left -= 0.002; // Always prefer left if similar
@@ -98,7 +110,7 @@ Trajectory Plan::GenTrajectory(vector<double> previous_path_x, vector<double> pr
             }
         }
     } else if (ref_velocity_ < 49.5){
-        ref_velocity_ += .224;
+        ref_velocity_ += .324;
         cout << "Keep Lane" << endl;
         current_state_ = State::KEEP_LANE;
     }

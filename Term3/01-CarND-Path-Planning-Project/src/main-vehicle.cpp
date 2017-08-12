@@ -42,30 +42,6 @@ void MainVehicle::ComputeGap(vector<vector<double>> sensor_fusion, Pathway road_
                 gap_rear_[lane] = -distance;
                 closest_rear_[lane] = other_vehicle;
             }
-
-            // cout << "Lane: " << (2+4*lane_-2) << " " << other_vehicle.d_ << " " << (2+4*lane_+2) << endl;
-            // cout << "D: " << other_vehicle.d_;
-            // if (other_vehicle.d_ < (2+4*lane_+2) && other_vehicle.d_ > (2+4*lane_-2))
-            //    cout << check_car_s << endl;
-            // if (check_car_s > s_) {
-            //
-            // } else {
-            //
-            // }
-            // other_vehicle.ComputeCarSpeed(road_map);
-            // close_cars_[id] = other_vehicle;
-            //
-            // int lane = Util::DToLane(other_vehicle.d_);
-            // cout << lane << endl;
-            // double distance = other_vehicle.s_ - s_;
-            // if (distance > 0.0 && distance < gap_front_[lane]) {
-            //     gap_front_[lane] = distance;
-            //     closest_front_[lane] = other_vehicle;
-            // }
-            // if (distance < 0.0 && -distance < gap_rear_[lane]) {
-            //     gap_rear_[lane] = -distance;
-            //     closest_rear_[lane] = other_vehicle;
-            // }
         }
     }
 }

@@ -11,6 +11,7 @@ from glob import glob
 from urllib.request import urlretrieve
 from tqdm import tqdm
 
+VGG_MEAN = [103.939, 116.779, 123.68]
 
 class DLProgress(tqdm):
     last_block = 0
@@ -57,6 +58,12 @@ def maybe_download_pretrained_vgg(data_dir):
         # Remove zip file to save space
         os.remove(os.path.join(vgg_path, vgg_filename))
 
+def mean_rgb(img):
+    new_img = np.copy(img).astype(np.float32)
+    new_img[..., 0] -= VGG_MEAN[0]
+    new_img[..., 1] -= VGG_MEAN[1]
+    new_img[..., 2] -= VGG_MEAN[2]
+    return new_img
 
 def gen_batch_function(data_folder, image_shape):
     """
@@ -85,6 +92,8 @@ def gen_batch_function(data_folder, image_shape):
                 gt_image_file = label_paths[os.path.basename(image_file)]
 
                 image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
+                # image = mean_rgb(image)
+
                 gt_image = scipy.misc.imresize(scipy.misc.imread(gt_image_file), image_shape)
 
                 gt_bg = np.all(gt_image == background_color, axis=2)
@@ -101,7 +110,6 @@ def gen_batch_function(data_folder, image_shape):
             yield np.array(images), np.array(gt_images)
     return get_batches_fn
 
-
 def gen_test_output(sess, logits, keep_prob, image_pl, data_folder, image_shape):
     """
     Generate test output using the test images
@@ -115,6 +123,7 @@ def gen_test_output(sess, logits, keep_prob, image_pl, data_folder, image_shape)
     """
     for image_file in glob(os.path.join(data_folder, 'image_2', '*.png')):
         image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
+        # image = mean_rgb(image)
 
         im_softmax = sess.run(
             [tf.nn.softmax(logits)],

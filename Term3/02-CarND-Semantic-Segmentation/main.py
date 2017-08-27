@@ -139,7 +139,7 @@ def run():
     runs_dir = './runs'
     tests.test_for_kitti_dataset(data_dir)
 
-    epochs = 90
+    epochs = 50
     batch_size = 10
     label_image = tf.placeholder(tf.float32, (None, None, None, num_classes))
     learning_rate = tf.placeholder(tf.float32)

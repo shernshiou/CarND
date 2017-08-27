@@ -65,6 +65,13 @@ def mean_rgb(img):
     new_img[..., 2] -= VGG_MEAN[2]
     return new_img
 
+def mean_rgb_r(img):
+    new_img = np.copy(img).astype(np.float32)
+    new_img[..., 0] += VGG_MEAN[0]
+    new_img[..., 1] += VGG_MEAN[1]
+    new_img[..., 2] += VGG_MEAN[2]
+    return new_img
+
 def gen_batch_function(data_folder, image_shape):
     """
     Generate function to create batches of training data
@@ -92,7 +99,7 @@ def gen_batch_function(data_folder, image_shape):
                 gt_image_file = label_paths[os.path.basename(image_file)]
 
                 image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
-                # image = mean_rgb(image)
+                image = mean_rgb(image)
 
                 gt_image = scipy.misc.imresize(scipy.misc.imread(gt_image_file), image_shape)
 
@@ -104,8 +111,8 @@ def gen_batch_function(data_folder, image_shape):
                 gt_images.append(gt_image)
 
                 # Flip
-                # images.append(np.flip(image, axis=0))
-                # gt_images.append(np.flip(gt_image, axis=0))
+                images.append(np.flip(image, axis=0))
+                gt_images.append(np.flip(gt_image, axis=0))
 
             yield np.array(images), np.array(gt_images)
     return get_batches_fn
@@ -123,7 +130,7 @@ def gen_test_output(sess, logits, keep_prob, image_pl, data_folder, image_shape)
     """
     for image_file in glob(os.path.join(data_folder, 'image_2', '*.png')):
         image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
-        # image = mean_rgb(image)
+        image = mean_rgb(image)
 
         im_softmax = sess.run(
             [tf.nn.softmax(logits)],
@@ -132,6 +139,8 @@ def gen_test_output(sess, logits, keep_prob, image_pl, data_folder, image_shape)
         segmentation = (im_softmax > 0.5).reshape(image_shape[0], image_shape[1], 1)
         mask = np.dot(segmentation, np.array([[0, 255, 0, 127]]))
         mask = scipy.misc.toimage(mask, mode="RGBA")
+
+        image = mean_rgb_r(image)
         street_im = scipy.misc.toimage(image)
         street_im.paste(mask, box=None, mask=mask)
 

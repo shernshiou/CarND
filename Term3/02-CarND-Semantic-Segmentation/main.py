@@ -125,6 +125,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, optimizer, cross_entropy_
     for i in range(epochs):
         count = 0
         total_loss = 0
+        # print("Epoch {}/{}".format(i+1, epochs), end='', flush=True)
         for images, labels in get_batches_fn(batch_size):
             idx += 1
             count += 1
@@ -132,7 +133,8 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, optimizer, cross_entropy_
                 feed_dict= {input_image: images, label_image: labels,
                             keep_prob: 0.8, learning_rate: 1e-4})
             total_loss += loss
-            print("Epoch {}/{}, Loss: {:.4f}".format(i+1, epochs, loss))
+            # print(" {:.4f}".format(loss), end='', flush=True)
+            print(" . ", end='', flush=True)
         print("Epoch {}, Avg loss: {:.4f}".format(i+1, total_loss/count))
 tests.test_train_nn(train_nn)
 
@@ -147,6 +149,8 @@ def run():
     batch_size = 10
     label_image = tf.placeholder(tf.float32, (None, None, None, num_classes))
     learning_rate = tf.placeholder(tf.float32)
+
+    saver = tf.train.Saver()
 
     # Download pretrained vgg model
     helper.maybe_download_pretrained_vgg(data_dir)
@@ -178,7 +182,11 @@ def run():
         train_nn(sess, epochs, batch_size, get_batches_fn, optimizer, cross_entropy_loss,
                  vgg_input, label_image, vgg_keep_prob, learning_rate)
 
-        # TODO: Save inference data using helper.save_inference_samples
+        # Save the variables to disk.
+        save_path = saver.save(sess, "/fcn8s.ckpt")
+        print("Model saved in file: %s" % save_path)
+
+        # Save inference data using helper.save_inference_samples
         helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, vgg_keep_prob, vgg_input)
 
         # OPTIONAL: Apply the trained model to a video
